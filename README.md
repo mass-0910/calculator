@@ -1,6 +1,6 @@
 # calculator
 
-![calc_null](https://user-images.githubusercontent.com/53329734/77129388-36c97600-6a97-11ea-9b81-0f13dcdb7625.png)
+![screenshot](https://user-images.githubusercontent.com/53329734/133218457-91261d0b-5d3d-4ee8-afbd-4cbab4d1f527.png)
 
 ![calc_run](https://user-images.githubusercontent.com/53329734/77129514-9a53a380-6a97-11ea-8bdb-9c9c1be978ce.png)
 
@@ -16,6 +16,10 @@ This program can calculate the following operators.
 - \*
 - /
 - %
+- ^ (power)
+- ! (factorial)
+- P (permutation)
+- C (combination)
 - (
 - )
 

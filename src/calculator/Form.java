@@ -24,7 +24,7 @@ public class Form {
 
 	public void split() {
 		String bag = "";
-		String operator = "\\+|-|\\*|/|\\(|\\)|%|sin|cos|tan|abs|log|sqrt|cbrt|pow|exp|asin|acos|atan|deg|rad|PI|E|\\{|\\}";
+		String operator = "\\+|-|\\*|/|\\(|\\)|%|\\^|!|C|P|sin|cos|tan|abs|log|sqrt|cbrt|pow|exp|asin|acos|atan|deg|rad|PI|E|\\{|\\}";
 		while (pos < form.length()) {
 			space();
 			bag = pack(bag);
@@ -215,7 +215,6 @@ public class Form {
 		default:
 			System.out.println(" " + (pos - 1) + " -> " + pos);
 			pos--;
-			System.out.println(" " + (pos + 1) + " -> " + pos);
 			break;
 		}
 		System.out.println(" term : " + x);
@@ -247,6 +246,27 @@ public class Form {
 			System.out.println("  " + (pos - 1) + " -> " + pos);
 			x = 0.0;
 		}
+        switch (peek()) {
+        case "^":
+			System.out.println("  " + (pos - 1) + " -> " + pos);
+            x = Math.pow(x, number());
+            break;
+        case "!":
+            System.out.println("  " + (pos - 1) + " -> " + pos);
+            x = factorial((int)x.doubleValue());
+            break;
+        case "C":
+            System.out.println("  " + (pos - 1) + " -> " + pos);
+            x = Double.valueOf(combination((int)x.doubleValue(), (int)number(), true));
+            break;
+        case "P":
+            System.out.println("  " + (pos - 1) + " -> " + pos);
+            x = permutation((int)x.doubleValue(), (int)number());
+            break;
+        default:
+            System.out.println("  " + (pos - 1) + " -> " + pos);
+            pos--;
+        }
 		System.out.println("  number : " + x);
 		return x;
 	}
@@ -270,5 +290,56 @@ public class Form {
 		}
 		System.out.println();
 	}
+
+    private double factorial(int n) {
+        if (n < 0) return 0;
+        if (n == 0) return 1;
+        double ans = n;
+        for(int t = n - 1; t > 0; t--){
+            ans *= t;
+        }
+        return ans;
+    }
+
+    private double permutation(int n, int r) {
+        if (n < 0 || r < 0) return 0;
+        if (n == 0) return 1;
+        if (n < r) return 0;
+        double ans = n;
+        for(int t = n - 1; t > n - r; t--){
+            ans *= t;
+        }
+        return ans;
+    }
+
+    static Integer[][] dp;
+    private static int combination(int n, int r, boolean init) {
+        if (r == 0) {
+            return 1;
+        }
+        if (init) {
+            dp = new Integer[n + 1][r + 1];
+            for (int i = 0; i <= n; i++) {
+                dp[i][1] = i;
+            }
+            for (int i = 0; i <= r; i++) {
+                dp[0][i] = 0;
+            }
+            if (r > n / 2) {
+                r = n - r;
+            }
+        }
+        return getInt(n - 1, r) + getInt(n - 1, r - 1);
+    }
+
+    private static int getInt(int n, int r) {
+        if (n < 0 || r < 0) {
+            return 0;
+        }
+        if (dp[n][r] != null) {
+            return dp[n][r].intValue();
+        }
+        return combination(n, r, false);
+    }
 
 }
