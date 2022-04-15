@@ -52,18 +52,6 @@ public class Form {
 				bag = "";
 			}
 		}
-		splittedForm.add("end");
-		entity.add(Double.valueOf(0));
-		splittedForm.add("end");
-		entity.add(Double.valueOf(0));
-		splittedForm.add("end");
-		entity.add(Double.valueOf(0));
-		splittedForm.add("end");
-		entity.add(Double.valueOf(0));
-		splittedForm.add("end");
-		entity.add(Double.valueOf(0));
-		splittedForm.add("end");
-		entity.add(Double.valueOf(0));
 	}
 
 	private void space() {
@@ -272,6 +260,11 @@ public class Form {
 	}
 
 	private String peek() {
+        if (pos >= splittedForm.size()) {
+            pos++;
+            entitynum = 0.0;
+            return "";
+        }
 		String ret = splittedForm.get(pos);
 		if (ret.equals("number")) {
 			entitynum = entity.get(pos).doubleValue();
