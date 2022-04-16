@@ -7,8 +7,147 @@ public class Form {
 	String form;
 	int pos;
 	ArrayList<String> splittedForm = new ArrayList<String>();
-	ArrayList<Double> entity = new ArrayList<Double>();
-	double entitynum = 0;
+	ArrayList<Num> entity = new ArrayList<Num>();
+	Num entitynum;
+
+    private class Num {
+
+        private int intVal;
+        private double realVal;
+        private boolean isInt;
+
+        Num(int val) {
+            intVal = val;
+            isInt = true;
+        }
+
+        Num(double val) {
+            realVal = val;
+            isInt = false;
+        }
+
+        Num(String val) {
+            try {
+                intVal = Integer.valueOf(val);
+                isInt = true;
+            } catch (NumberFormatException e) {
+                realVal = Double.valueOf(val);
+                isInt = false;
+            }
+        }
+
+        public int getIntVal() {
+            return intVal;
+        }
+
+        public double getDoubleVal() {
+            if (isInt) {
+                return intVal;
+            } else {
+                return realVal;
+            }
+        }
+
+        public Num add(Num n) {
+            if (this.isInt && n.isInt) {
+                return new Num(this.getIntVal() + n.getIntVal());
+            } else {
+                return new Num(this.getDoubleVal() + n.getDoubleVal());
+            }
+        }
+
+        public Num sub(Num n) {
+            if (this.isInt && n.isInt) {
+                return new Num(this.getIntVal() - n.getIntVal());
+            } else {
+                return new Num(this.getDoubleVal() - n.getDoubleVal());
+            }
+        }
+
+        public Num mul(Num n) {
+            if (this.isInt && n.isInt) {
+                return new Num(this.getIntVal() * n.getIntVal());
+            } else {
+                return new Num(this.getDoubleVal() * n.getDoubleVal());
+            }
+        }
+
+        public Num div(Num n) {
+            if (this.isInt && n.isInt) {
+                if (n.getIntVal() == 0 && this.getIntVal() > 0) return new Num(Double.POSITIVE_INFINITY);
+                if (n.getIntVal() == 0 && this.getIntVal() == 0) return new Num(0);
+                if (n.getIntVal() == 0 && this.getIntVal() < 0) return new Num(Double.NEGATIVE_INFINITY);
+                if (this.getIntVal() % n.getIntVal() == 0) {
+                    return new Num(this.getIntVal() / n.getIntVal());
+                } else {
+                    return new Num(this.getDoubleVal() / n.getDoubleVal());
+                }
+            } else {
+                return new Num(this.getDoubleVal() / n.getDoubleVal());
+            }
+        }
+
+        public Num mod(Num n) {
+            if (this.isInt && n.isInt) {
+                if (n.getIntVal() == 0) return new Num(Double.NaN);
+                return new Num(this.getIntVal() % n.getIntVal());
+            } else if (this.isInt && !n.isInt){
+                return new Num(this.getIntVal() % n.getDoubleVal());
+            } else if (!this.isInt && n.isInt) {
+                return new Num(this.getDoubleVal() % n.getIntVal());
+            } else {
+                return new Num(this.getDoubleVal() % n.getDoubleVal());
+            }
+        }
+
+        public Num sqrt() {
+            if (isInt) {
+                int[] mod256 = {
+                    0, 1, 129, 4, 132, 9, 137, 16, 144, 17, 145, 25, 153, 33, 161, 36, 164, 169, 41,
+                    49, 177, 185, 57, 64, 193, 65, 196, 68, 73, 201, 81, 209, 217, 89, 225, 97, 100,
+                    228, 249, 105, 233, 113, 241, 121
+                };
+                for (int m : mod256) {
+                    if (this.intVal % 256 == m) break;
+                    if (m == 121) return new Num(Math.sqrt(intVal));
+                }
+                for (int i = 1; i * i <= intVal; i++) {
+                    if (i * i == intVal) {
+                        return new Num(i);
+                    }
+                }
+                return new Num(Math.sqrt(intVal));
+            } else {
+                return new Num(Math.sqrt(realVal));
+            }
+        }
+
+        public Num pow(Num e) {
+            if (this.isInt && e.isInt() && e.getIntVal() > 0) {
+                int ans = this.intVal;
+                for (int i = 1; i < e.getIntVal(); i++) {
+                    ans *= this.intVal;
+                }
+                return new Num(ans);
+            } else {
+                return new Num(Math.pow(this.getDoubleVal(), e.getDoubleVal()));
+            }
+        }
+
+        public boolean isInt() {
+            return isInt;
+        }
+
+        @Override
+        public String toString() {
+            if (isInt) {
+                return String.valueOf(intVal);
+            } else {
+                return String.valueOf(realVal);
+            }
+        }
+
+    }
 
 	Form() {
 		pos = 0;
@@ -19,7 +158,7 @@ public class Form {
 		pos = 0;
 		splittedForm.clear();
 		entity.clear();
-		entitynum = 0.0;
+		entitynum = new Num(0);
 	}
 
 	public void split() {
@@ -32,7 +171,7 @@ public class Form {
 				for (;;) {
 					if (pos == form.length()) {
 						splittedForm.add("number");
-						entity.add(Double.valueOf(bag));
+						entity.add(new Num(bag));
 						break;
 					}
 					bag = pack(bag);
@@ -40,7 +179,7 @@ public class Form {
 						bag = bag.substring(0, bag.length() - 1);
 						pos--;
 						splittedForm.add("number");
-						entity.add(Double.valueOf(bag));
+						entity.add(new Num(bag));
 						bag = "";
 						break;
 					}
@@ -48,7 +187,7 @@ public class Form {
 			}
 			if (bag.matches(operator)) {
 				splittedForm.add(bag);
-				entity.add(Double.valueOf(0));
+				entity.add(new Num(0));
 				bag = "";
 			}
 		}
@@ -72,21 +211,21 @@ public class Form {
 
 	public String calc() {
 		pos = 0;
-		return String.valueOf(expr());
+		return expr().toString();
 	}
 
-	private double expr() {
+	private Num expr() {
 		System.out.println("expr");
-		double x = term();
+		Num x = term();
 		for (;;) {
 			switch (peek()) {
 			case "+":
 				System.out.println("" + (pos - 1) + " -> " + pos);
-				x += term();
+				x = x.add(term());
 				continue;
 			case "-":
 				System.out.println("" + (pos - 1) + " -> " + pos);
-				x -= term();
+				x = x.sub(term());
 				continue;
 			default:
 				System.out.println("" + (pos - 1) + " -> " + pos);
@@ -98,13 +237,13 @@ public class Form {
 		return x;
 	}
 
-	private double term() {
+	private Num term() {
 		System.out.println(" term");
-		Double x;
+		Num x;
 		switch (peek()) {
 		case "-":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x = -number();
+			x = number().mul(new Num(-1));
 			break;
 		case "+":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
@@ -112,72 +251,77 @@ public class Form {
 			break;
 		case "sin":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x = Math.sin(number());
+			x = new Num(Math.sin(number().getDoubleVal()));
 			break;
 		case "cos":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x = Math.cos(number());
+			x = new Num(Math.cos(number().getDoubleVal()));
 			break;
 		case "tan":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x = Math.tan(number());
+			x = new Num(Math.tan(number().getDoubleVal()));
 			break;
 		case "asin":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x = Math.asin(number());
+			x = new Num(Math.asin(number().getDoubleVal()));
 			break;
 		case "acos":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x = Math.acos(number());
+			x = new Num(Math.acos(number().getDoubleVal()));
 			break;
 		case "atan":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x = Math.atan(number());
+			x = new Num(Math.atan(number().getDoubleVal()));
 			break;
 		case "abs":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x = Math.abs(number());
+            Num n = number();
+            if (n.isInt()) {
+                x = new Num(Math.abs(n.getIntVal()));
+            } else {
+                x = new Num(Math.abs(n.getDoubleVal()));
+            }
 			break;
 		case "deg":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x = Math.toDegrees(number());
+			x = new Num(Math.toDegrees(number().getDoubleVal()));
 			break;
 		case "rad":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x = Math.toRadians(number());
+			x = new Num(Math.toRadians(number().getDoubleVal()));
 			break;
 		case "log":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
 			if (peek().equals("{")) {
-				Double base = expr();
+				Num base = expr();
 				peek();
-				x = Math.log(number()) / Math.log(base);
+				x = new Num(Math.log(number().getDoubleVal()) / Math.log(base.getDoubleVal()));
 			} else {
 				pos--;
-				x = Math.log(number());
+				x = new Num(Math.log(number().getDoubleVal()));
 			}
 			break;
 		case "sqrt":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x = Math.sqrt(number());
+			x = number().sqrt();
 			break;
 		case "cbrt":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x = Math.cbrt(number());
+			x = new Num(Math.cbrt(number().getDoubleVal()));
 			break;
 		case "exp":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x = Math.exp(number());
+			x = new Num(Math.exp(number().getDoubleVal()));
 			break;
 		case "pow":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
 			if (peek().equals("{")) {
-				Double pownum = expr();
+				Num pownum = expr();
 				peek();
-				x = Math.pow(number(), pownum);
+				x = number().pow(pownum);
 			} else {
 				pos--;
-				x = Math.pow(number(), 2);
+				x = number().pow(new Num(2));
 			}
 			break;
 		default:
@@ -190,15 +334,15 @@ public class Form {
 		switch (peek()) {
 		case "*":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x *= term();
+			x = x.mul(term());
 			break;
 		case "/":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x /= term();
+			x = x.div(term());
 			break;
 		case "%":
 			System.out.println(" " + (pos - 1) + " -> " + pos);
-			x %= term();
+			x = x.mod(term());
 			break;
 		default:
 			System.out.println(" " + (pos - 1) + " -> " + pos);
@@ -209,9 +353,9 @@ public class Form {
 		return x;
 	}
 
-	private double number() {
+	private Num number() {
 		System.out.println("  number");
-		Double x;
+		Num x;
 		switch (peek()) {
 		case "(":
 			System.out.println("  " + (pos - 1) + " -> " + pos);
@@ -224,32 +368,32 @@ public class Form {
 			break;
 		case "PI":
 			System.out.println("  " + (pos - 1) + " -> " + pos);
-			x = Math.PI;
+			x = new Num(Math.PI);
 			break;
 		case "E":
 			System.out.println("  " + (pos - 1) + " -> " + pos);
-			x = Math.E;
+			x = new Num(Math.E);
 			break;
 		default:
 			System.out.println("  " + (pos - 1) + " -> " + pos);
-			x = 0.0;
+			x = new Num(0);
 		}
         switch (peek()) {
         case "^":
 			System.out.println("  " + (pos - 1) + " -> " + pos);
-            x = Math.pow(x, number());
+            x = x.pow(number());
             break;
         case "!":
             System.out.println("  " + (pos - 1) + " -> " + pos);
-            x = factorial((int)x.doubleValue());
+            x = new Num(factorial((int)x.getDoubleVal()));
             break;
         case "C":
             System.out.println("  " + (pos - 1) + " -> " + pos);
-            x = Double.valueOf(combination((int)x.doubleValue(), (int)number(), true));
+            x = new Num(combination((int)x.getDoubleVal(), (int)number().getDoubleVal(), true));
             break;
         case "P":
             System.out.println("  " + (pos - 1) + " -> " + pos);
-            x = permutation((int)x.doubleValue(), (int)number());
+            x = new Num(permutation((int)x.getDoubleVal(), (int)number().getDoubleVal()));
             break;
         default:
             System.out.println("  " + (pos - 1) + " -> " + pos);
@@ -262,12 +406,12 @@ public class Form {
 	private String peek() {
         if (pos >= splittedForm.size()) {
             pos++;
-            entitynum = 0.0;
+            entitynum = new Num(0);
             return "";
         }
 		String ret = splittedForm.get(pos);
 		if (ret.equals("number")) {
-			entitynum = entity.get(pos).doubleValue();
+			entitynum = entity.get(pos);
 		}
 		pos++;
 		return ret;
