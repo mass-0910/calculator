@@ -186,6 +186,17 @@ public class Form {
 				}
 			}
 			if (bag.matches(operator)) {
+                if (bag.equals("P")) {
+                    try {
+                        bag = pack(bag);
+                        if (!bag.equals("PI")) {
+                            bag = bag.substring(0, bag.length() - 1);
+                            pos--;
+                        }
+                    } catch(StringIndexOutOfBoundsException e) {
+
+                    }
+                }
 				splittedForm.add(bag);
 				entity.add(new Num(0));
 				bag = "";
