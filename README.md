@@ -23,7 +23,7 @@ This program can calculate the following operators.
 - (
 - )
 
-## finctions
+## functions
 
 This program can calculate the following functions.  
 - sin(x) : Returns sine value.
